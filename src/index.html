@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BOS Field Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f0d;
+  --surface: #1a1a17;
+  --surface2: #242420;
+  --border: #2e2e28;
+  --border2: #3a3a34;
+  --text: #e8e6df;
+  --muted: #6b6960;
+  --muted2: #4a4940;
+  --green: #4a9e4a;
+  --green-dim: #1e3d1e;
+  --green-text: #7acc7a;
+  --red: #9e4a4a;
+  --red-dim: #3d1e1e;
+  --red-text: #cc7a7a;
+  --amber: #9e7a2a;
+  --amber-dim: #3d2e0e;
+  --amber-text: #ccaa5a;
+  --blue: #2a6a9e;
+  --blue-dim: #0e2a3d;
+  --blue-text: #5aaacc;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+  --r: 4px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+  overscroll-behavior: none;
+}
+
+/* ── HEADER ── */
+.app-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.app-title {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.app-title span {
+  color: var(--green-text);
+}
+
+.header-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  text-align: right;
+}
+
+/* ── TABS ── */
+.tabs {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+
+.tab-btn.active {
+  color: var(--green-text);
+  border-bottom-color: var(--green-text);
+}
+
+/* ── VIEWS ── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── VISIT HEADER ── */
+.visit-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+}
+
+.visit-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.progress-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+.progress-track {
+  flex: 1;
+  height: 3px;
+  background: var(--border2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--green-text);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.station-dots {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.station-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r);
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-direction: column;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.station-dot.current {
+  border-color: var(--green-text);
+  color: var(--green-text);
+  background: var(--green-dim);
+}
+
+.station-dot.done {
+  border-color: var(--green);
+  background: var(--green-dim);
+  color: var(--green-text);
+}
+
+.station-dot.flagged {
+  border-color: var(--amber);
+  background: var(--amber-dim);
+  color: var(--amber-text);
+}
+
+/* ── STATION CARD ── */
+.station-view {
+  padding: 14px 16px;
+}
+
+.station-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.station-name {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.04em;
+}
+
+.station-site {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── SENSOR SECTION ── */
+.sensor-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.sensor-header {
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+}
+
+.sensor-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sensor-tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.sensor-tag.lf { background: var(--blue-dim); color: var(--blue-text); border: 1px solid var(--blue); }
+.sensor-tag.br { background: var(--amber-dim); color: var(--amber-text); border: 1px solid var(--amber); }
+.sensor-tag.hb { background: var(--green-dim); color: var(--green-text); border: 1px solid var(--green); }
+.sensor-tag.sp { background: var(--surface2); color: var(--muted); border: 1px solid var(--border2); }
+
+.sensor-fullname {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.sensor-serial {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--amber-text);
+  background: var(--amber-dim);
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--amber);
+}
+
+.sensor-progress {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.sensor-body {
+  padding: 0;
+}
+
+/* ── CHECK ITEMS ── */
+.check-item {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.check-item:last-child { border-bottom: none; }
+
+.check-name {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text);
+  padding-top: 6px;
+  min-width: 120px;
+}
+
+.check-name.done { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--muted2); }
+.check-name.flagged { color: var(--amber-text); }
+
+.check-controls {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.chk-btn {
+  height: 32px;
+  min-width: 32px;
+  padding: 0 8px;
+  border-radius: var(--r);
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s;
+  font-family: var(--mono);
+}
+
+.chk-btn:active { transform: scale(0.92); }
+.chk-btn.yes { background: var(--green-dim); border-color: var(--green); color: var(--green-text); }
+.chk-btn.no { background: var(--red-dim); border-color: var(--red); color: var(--red-text); }
+.chk-btn.na { background: var(--amber-dim); border-color: var(--amber); color: var(--amber-text); font-size: 10px; }
+
+.moisture-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.moisture-input {
+  width: 60px;
+  height: 32px;
+  padding: 0 8px;
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  color: var(--text);
+  text-align: center;
+}
+
+.moisture-input:focus { outline: 1px solid var(--green); }
+.moisture-input.high { border-color: var(--red); color: var(--red-text); }
+.moisture-unit { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+.remark-row {
+  width: 100%;
+  padding-top: 6px;
+}
+
+.remark-input {
+  width: 100%;
+  padding: 6px 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  color: var(--text);
+  resize: none;
+}
+
+.remark-input:focus { outline: 1px solid var(--muted); }
+
+.add-remark-btn {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  letter-spacing: 0.04em;
+}
+
+/* ── NEXT STATION BUTTON ── */
+.station-actions {
+  padding: 14px 16px 32px;
+  display: flex;
+  gap: 10px;
+}
+
+.next-btn {
+  flex: 1;
+  padding: 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--green-dim);
+  color: var(--green-text);
+  border: 1px solid var(--green);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.next-btn:active { opacity: 0.8; }
+
+.export-btn {
+  flex: 1;
+  padding: 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--blue-dim);
+  color: var(--blue-text);
+  border: 1px solid var(--blue);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+/* ── ACKNOWLEDGEMENT SCREEN ── */
+.ack-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 200;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.ack-overlay.open { display: block; }
+
+.ack-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  max-width: 480px;
+  margin: 20px auto;
+  overflow: hidden;
+}
+
+.ack-header {
+  background: var(--amber-dim);
+  border-bottom: 1px solid var(--amber);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ack-header h3 {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--amber-text);
+}
+
+.ack-body { padding: 16px; }
+
+.ack-intro {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 14px;
+  line-height: 1.6;
+}
+
+.ack-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.ack-item.acknowledged { border-color: var(--green); background: var(--green-dim); }
+
+.ack-checkbox {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 12px;
+  margin-top: 1px;
+  transition: all 0.15s;
+}
+
+.ack-item.acknowledged .ack-checkbox {
+  background: var(--green-dim);
+  border-color: var(--green);
+  color: var(--green-text);
+}
+
+.ack-text { font-size: 13px; line-height: 1.5; }
+.ack-location { font-family: var(--mono); font-size: 11px; color: var(--amber-text); margin-bottom: 2px; }
+.ack-detail { color: var(--muted); font-size: 12px; }
+
+.ack-confirm-btn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 13px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--green-dim);
+  color: var(--green-text);
+  border: 1px solid var(--green);
+  border-radius: var(--r);
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+
+.ack-confirm-btn.ready { opacity: 1; }
+
+/* ── HISTORY ── */
+.history-view { padding: 14px 16px; }
+
+.history-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+select {
+  width: 100%;
+  padding: 8px 10px;
+  font-family: var(--sans);
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  color: var(--text);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.visit-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  margin-bottom: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.visit-card:hover { border-color: var(--border2); }
+
+.visit-card-head {
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.visit-date {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+}
+
+.visit-flags {
+  display: flex;
+  gap: 6px;
+}
+
+.flag-chip {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.flag-chip.ok { background: var(--green-dim); color: var(--green-text); }
+.flag-chip.blank { background: var(--amber-dim); color: var(--amber-text); }
+.flag-chip.issue { background: var(--red-dim); color: var(--red-text); }
+
+.visit-stations {
+  padding: 8px 14px;
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.visit-station-chip {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+}
+
+.visit-station-chip.done { border-color: var(--green); color: var(--green-text); background: var(--green-dim); }
+.visit-station-chip.flagged { border-color: var(--amber); color: var(--amber-text); background: var(--amber-dim); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 300;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  width: 100%;
+  max-width: 480px;
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.modal-head {
+  background: var(--surface2);
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-head h3 {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.modal-body { padding: 16px; }
+
+.modal-station-block {
+  margin-bottom: 14px;
+}
+
+.modal-station-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-check-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-check-row:last-child { border-bottom: none; }
+.modal-check-label { color: var(--muted); }
+.modal-check-val { font-family: var(--mono); font-size: 11px; }
+.modal-check-val.yes { color: var(--green-text); }
+.modal-check-val.no { color: var(--red-text); }
+.modal-check-val.na { color: var(--amber-text); }
+
+.delete-btn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid var(--red);
+  color: var(--red-text);
+  border-radius: var(--r);
+  cursor: pointer;
+}
+
+.new-visit-btn {
+  width: 100%;
+  padding: 13px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--surface2);
+  color: var(--muted);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 2.5;
+  letter-spacing: 0.04em;
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-title">BOS <span>Field</span> Tracker</div>
+  <div class="header-meta" id="header-date"></div>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('visit')">Visit</button>
+  <button class="tab-btn" onclick="switchTab('history')">History</button>
+</div>
+
+<div id="view-visit" class="view active">
+  <div class="visit-header">
+    <div class="visit-progress">
+      <span class="progress-label" id="progress-label">0 / 8</span>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="station-dots" id="station-dots"></div>
+  </div>
+  <div id="station-area"></div>
+</div>
+
+<div id="view-history" class="view">
+  <div class="history-view">
+    <button class="new-visit-btn" onclick="startNewVisit()">+ Start new visit</button>
+    <div class="history-filters">
+      <div>
+        <select id="filter-site" onchange="renderHistory()">
+          <option value="">All sites</option>
+          <option>BOS001</option><option>BOS002</option><option>BOS003</option><option>BOS004</option>
+        </select>
+      </div>
+      <div>
+        <select id="filter-sensor" onchange="renderHistory()">
+          <option value="">All sensors</option>
+          <option>LF</option><option>BR</option><option>HB</option>
+        </select>
+      </div>
+    </div>
+    <div id="history-list"></div>
+  </div>
+</div>
+
+<!-- Acknowledgement overlay -->
+<div class="ack-overlay" id="ack-overlay">
+  <div class="ack-box">
+    <div class="ack-header">
+      <span style="font-size:18px">⚠</span>
+      <h3 id="ack-title">Incomplete items</h3>
+    </div>
+    <div class="ack-body">
+      <p class="ack-intro" id="ack-intro"></p>
+      <div id="ack-items"></div>
+      <button class="ack-confirm-btn" id="ack-confirm-btn" onclick="confirmAck()">
+        Acknowledge all &amp; continue
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- History detail modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-box"></div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+
+const STATIONS = [
+  { site:'BOS001', loc:'D08', lf:'332',     hb:'21782601' },
+  { site:'BOS001', loc:'H04', lf:'331',     hb:'21782603' },
+  { site:'BOS002', loc:'D04', lf:'334',     hb:'21782593' },
+  { site:'BOS002', loc:'H08', lf:'333',     hb:'21782606' },
+  { site:'BOS003', loc:'D06', lf:'329',     hb:'21782605' },
+  { site:'BOS003', loc:'H06', lf:'330',     hb:'21782592' },
+  { site:'BOS004', loc:'B04', lf:'328',     hb:'21785491' },
+  { site:'BOS004', loc:'H04', lf:'327',     hb:'21782604' },
+];
+
+const SENSOR_CHECKS = {
+  LF: [
+    { id:'lf_pic_sensor',   label:'Pic of leaf sensor',           type:'check' },
+    { id:'lf_pic_pre',      label:'Pic of sensor head (pre-clean)',type:'check' },
+    { id:'lf_clean',        label:'Clean sensor head',            type:'check' },
+    { id:'lf_pic_post',     label:'Pic of sensor head (post-clean)',type:'check' },
+    { id:'lf_data',         label:'Data download',                type:'check' },
+    { id:'lf_moisture',     label:'Moisture %',                   type:'moisture' },
+    { id:'lf_desiccant',    label:'Desiccant pod replaced',       type:'check' },
+    { id:'lf_panel_pic',    label:'Pic of computer panel',        type:'check' },
+    { id:'lf_lid',          label:'Closed lid',                   type:'check' },
+  ],
+  BR: [
+    { id:'br_battery',      label:'Battery replaced',             type:'check' },
+    { id:'br_data',         label:'Data download',                type:'check' },
+  ],
+  HB: [
+    { id:'hb_data',         label:'Data download',                type:'check' },
+  ],
+  SP: [
+    { id:'sp_inspect',      label:'Inspect solar panel',          type:'check' },
+  ],
+};
+
+const SENSOR_ORDER = ['LF','BR','HB','SP'];
+const SENSOR_NAMES = { LF:'Leaf', BR:'Brinno', HB:'Hobo', SP:'Solar Panel' };
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+
+let visits = JSON.parse(localStorage.getItem('bos_visits') || '[]');
+let currentVisit = JSON.parse(localStorage.getItem('bos_current') || 'null');
+let currentStationIdx = parseInt(localStorage.getItem('bos_station_idx') || '0');
+let ackCallback = null;
+
+function saveState() {
+  localStorage.setItem('bos_visits', JSON.stringify(visits));
+  localStorage.setItem('bos_current', JSON.stringify(currentVisit));
+  localStorage.setItem('bos_station_idx', String(currentStationIdx));
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+
+function init() {
+  const d = new Date();
+  document.getElementById('header-date').textContent =
+    d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+
+  if (!currentVisit) {
+    currentVisit = {
+      exportDate: null,
+      stations: STATIONS.map(s => ({
+        site: s.site,
+        loc: s.loc,
+        lf_serial: s.lf,
+        hb_serial: s.hb,
+        stationDate: null,
+        checks: {}
+      }))
+    };
+    saveState();
+  }
+  renderStationDots();
+  renderStation(currentStationIdx);
+}
+
+// ── STATION DOTS ──────────────────────────────────────────────────────────────
+
+function renderStationDots() {
+  const container = document.getElementById('station-dots');
+  const done = currentVisit.stations.filter(s => s.stationDate).length;
+  document.getElementById('progress-label').textContent = `${done} / 8`;
+  document.getElementById('progress-fill').style.width = `${done/8*100}%`;
+
+  container.innerHTML = STATIONS.map((s, i) => {
+    const st = currentVisit.stations[i];
+    const isDone = !!st.stationDate;
+    const isCurrent = i === currentStationIdx;
+    const hasBlanks = isDone && getStationBlanks(i).length > 0;
+    let cls = 'station-dot';
+    if (isCurrent) cls += ' current';
+    else if (hasBlanks) cls += ' flagged';
+    else if (isDone) cls += ' done';
+    return `<div class="${cls}" onclick="jumpToStation(${i})" title="${s.site} / ${s.loc}">
+      <span>${s.site.slice(-3)}</span>
+      <span>${s.loc}</span>
+    </div>`;
+  }).join('');
+}
+
+function jumpToStation(i) {
+  currentStationIdx = i;
+  saveState();
+  renderStationDots();
+  renderStation(i);
+}
+
+// ── STATION RENDER ────────────────────────────────────────────────────────────
+
+function renderStation(idx) {
+  const s = STATIONS[idx];
+  const st = currentVisit.stations[idx];
+  const area = document.getElementById('station-area');
+
+  let html = `<div class="station-view">
+    <div class="station-title">
+      <div>
+        <div class="station-name">${s.loc}</div>
+        <div class="station-site">${s.site}</div>
+      </div>
+      ${st.stationDate ? `<span style="font-family:var(--mono);font-size:10px;color:var(--green-text)">✓ ${st.stationDate}</span>` : ''}
+    </div>`;
+
+  SENSOR_ORDER.forEach(sensor => {
+    const checks = SENSOR_CHECKS[sensor];
+    const serial = sensor === 'LF' ? s.lf : sensor === 'HB' ? s.hb : null;
+    const done = checks.filter(c => st.checks[c.id] !== undefined && st.checks[c.id] !== '').length;
+
+    html += `<div class="sensor-section">
+      <div class="sensor-header">
+        <div class="sensor-label">
+          <span class="sensor-tag ${sensor.toLowerCase()}">${sensor}</span>
+          <span class="sensor-fullname">${SENSOR_NAMES[sensor]}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${serial ? `<span class="sensor-serial">${serial}</span>` : ''}
+          <span class="sensor-progress">${done}/${checks.length}</span>
+        </div>
+      </div>
+      <div class="sensor-body">`;
+
+    checks.forEach(c => {
+      const val = st.checks[c.id] || '';
+      const remark = st.checks[c.id + '_remark'] || '';
+      const hasRemark = remark.length > 0;
+
+      if (c.type === 'moisture') {
+        const mval = st.checks[c.id] || '';
+        const isHigh = mval !== '' && parseFloat(mval) >= 40;
+        html += `<div class="check-item">
+          <span class="check-name${mval ? ' done' : ''}">${c.label}</span>
+          <div class="check-controls">
+            <div class="moisture-wrap">
+              <input class="moisture-input${isHigh?' high':''}" type="number" min="0" max="100"
+                placeholder="—" value="${mval}"
+                oninput="setMoisture(${idx},'${c.id}',this.value)"
+                style="width:64px">
+              <span class="moisture-unit">%</span>
+              ${isHigh ? `<span style="font-size:11px;color:var(--red-text)">⚠ HIGH</span>` : ''}
+            </div>
+            <button class="chk-btn na${val==='na'?' na':''}" onclick="setCheck(${idx},'${c.id}','na')">N/A</button>
+          </div>
+          <div class="remark-row">
+            ${hasRemark
+              ? `<input class="remark-input" placeholder="Remark…" value="${remark}" oninput="setRemark(${idx},'${c.id}',this.value)">`
+              : `<button class="add-remark-btn" onclick="addRemark(this,${idx},'${c.id}')">+ remark</button>`}
+          </div>
+        </div>`;
+      } else {
+        html += `<div class="check-item">
+          <span class="check-name${val==='yes'?' done':val==='na'?' flagged':''}">${c.label}</span>
+          <div class="check-controls">
+            <button class="chk-btn${val==='yes'?' yes':''}" onclick="setCheck(${idx},'${c.id}','yes')">✓</button>
+            <button class="chk-btn${val==='no'?' no':''}" onclick="setCheck(${idx},'${c.id}','no')">✗</button>
+            <button class="chk-btn na${val==='na'?' na':''}" onclick="setCheck(${idx},'${c.id}','na')">N/A</button>
+          </div>
+          <div class="remark-row">
+            ${hasRemark
+              ? `<input class="remark-input" placeholder="Remark…" value="${remark}" oninput="setRemark(${idx},'${c.id}',this.value)">`
+              : `<button class="add-remark-btn" onclick="addRemark(this,${idx},'${c.id}')">+ remark</button>`}
+          </div>
+        </div>`;
+      }
+    });
+
+    html += `</div></div>`;
+  });
+
+  const isLast = idx === 7;
+  html += `<div class="station-actions">
+    <button class="next-btn" onclick="${isLast ? 'triggerExport()' : `advanceStation(${idx})`}">
+      ${isLast ? '↓ Export visit CSV' : `Next station →`}
+    </button>
+  </div>`;
+
+  html += `</div>`;
+  area.innerHTML = html;
+  window.scrollTo(0, 0);
+}
+
+// ── CHECK SETTERS ─────────────────────────────────────────────────────────────
+
+function setCheck(stIdx, id, val) {
+  const st = currentVisit.stations[stIdx];
+  st.checks[id] = st.checks[id] === val ? '' : val;
+  saveState();
+  renderStation(stIdx);
+  renderStationDots();
+}
+
+function setMoisture(stIdx, id, val) {
+  currentVisit.stations[stIdx].checks[id] = val;
+  saveState();
+  // re-render only the moisture input highlight without full re-render
+  const input = document.querySelector('.moisture-input');
+  if (input) {
+    const isHigh = val !== '' && parseFloat(val) >= 40;
+    input.classList.toggle('high', isHigh);
+  }
+}
+
+function setRemark(stIdx, id, val) {
+  currentVisit.stations[stIdx].checks[id + '_remark'] = val;
+  saveState();
+}
+
+function addRemark(btn, stIdx, id) {
+  const row = btn.parentElement;
+  row.innerHTML = `<input class="remark-input" placeholder="Remark…" value="" oninput="setRemark(${stIdx},'${id}',this.value)">`;
+  row.querySelector('input').focus();
+}
+
+// ── BLANK DETECTION ───────────────────────────────────────────────────────────
+
+function getStationBlanks(stIdx) {
+  const st = currentVisit.stations[stIdx];
+  const blanks = [];
+  SENSOR_ORDER.forEach(sensor => {
+    SENSOR_CHECKS[sensor].forEach(c => {
+      const val = st.checks[c.id];
+      if (val === undefined || val === '') {
+        blanks.push({ sensor, label: c.label, id: c.id });
+      }
+    });
+  });
+  return blanks;
+}
+
+function getAllBlanks() {
+  const result = [];
+  STATIONS.forEach((s, i) => {
+    const st = currentVisit.stations[i];
+    const blanks = getStationBlanks(i);
+    if (!st.stationDate) {
+      result.push({ stIdx: i, site: s.site, loc: s.loc, unvisited: true, blanks: [] });
+    } else if (blanks.length) {
+      result.push({ stIdx: i, site: s.site, loc: s.loc, unvisited: false, blanks });
+    }
+  });
+  return result;
+}
+
+// ── ACKNOWLEDGEMENT ───────────────────────────────────────────────────────────
+
+let ackItems = [];
+
+function showAck(title, intro, items, onConfirm) {
+  ackItems = items.map((item, i) => ({ ...item, acked: false, i }));
+  ackCallback = onConfirm;
+
+  document.getElementById('ack-title').textContent = title;
+  document.getElementById('ack-intro').textContent = intro;
+
+  renderAckItems();
+  document.getElementById('ack-overlay').classList.add('open');
+}
+
+function renderAckItems() {
+  const container = document.getElementById('ack-items');
+  container.innerHTML = ackItems.map((item, i) => `
+    <div class="ack-item${item.acked?' acknowledged':''}" onclick="toggleAck(${i})">
+      <div class="ack-checkbox">${item.acked ? '✓' : ''}</div>
+      <div class="ack-text">
+        <div class="ack-location">${item.location}</div>
+        <div class="ack-detail">${item.detail}</div>
+      </div>
+    </div>`).join('');
+
+  const allAcked = ackItems.every(x => x.acked);
+  const btn = document.getElementById('ack-confirm-btn');
+  btn.classList.toggle('ready', allAcked);
+}
+
+function toggleAck(i) {
+  ackItems[i].acked = !ackItems[i].acked;
+  renderAckItems();
+}
+
+function confirmAck() {
+  if (!ackItems.every(x => x.acked)) return;
+  document.getElementById('ack-overlay').classList.remove('open');
+  if (ackCallback) ackCallback();
+}
+
+// ── STATION ADVANCE ───────────────────────────────────────────────────────────
+
+function advanceStation(idx) {
+  const blanks = getStationBlanks(idx);
+  const s = STATIONS[idx];
+  const st = currentVisit.stations[idx];
+
+  const proceed = () => {
+    st.stationDate = new Date().toLocaleDateString('en-GB');
+    currentStationIdx = idx + 1;
+    saveState();
+    renderStationDots();
+    renderStation(currentStationIdx);
+  };
+
+  if (blanks.length === 0) {
+    proceed();
+    return;
+  }
+
+  const items = blanks.map(b => ({
+    location: `${s.site} / ${s.loc} · ${b.sensor}`,
+    detail: `"${b.label}" will be blank in the CSV`
+  }));
+
+  showAck(
+    `${s.site} / ${s.loc} — incomplete`,
+    `${blanks.length} item(s) will be left blank. Acknowledge each one to proceed.`,
+    items,
+    proceed
+  );
+}
+
+// ── EXPORT ────────────────────────────────────────────────────────────────────
+
+function triggerExport() {
+  const allBlanks = getAllBlanks();
+
+  const proceed = () => {
+    exportCSV();
+  };
+
+  if (allBlanks.length === 0) {
+    proceed();
+    return;
+  }
+
+  // Mark last station date if not set
+  const lastSt = currentVisit.stations[7];
+  if (!lastSt.stationDate) lastSt.stationDate = null;
+
+  const items = [];
+  allBlanks.forEach(entry => {
+    if (entry.unvisited) {
+      items.push({
+        location: `${entry.site} / ${entry.loc}`,
+        detail: 'Station not visited — all fields will be blank in CSV'
+      });
+    } else {
+      entry.blanks.forEach(b => {
+        items.push({
+          location: `${entry.site} / ${entry.loc} · ${b.sensor}`,
+          detail: `"${b.label}" will be blank in the CSV`
+        });
+      });
+    }
+  });
+
+  showAck(
+    'Pre-export review',
+    `${items.length} blank item(s) across this visit. Acknowledge all to generate CSV.`,
+    items,
+    proceed
+  );
+}
+
+function exportCSV() {
+  const exportDate = new Date().toLocaleDateString('en-GB');
+  currentVisit.exportDate = exportDate;
+
+  // Build all checklist column IDs in order
+  const allCheckIds = [];
+  SENSOR_ORDER.forEach(sensor => {
+    SENSOR_CHECKS[sensor].forEach(c => allCheckIds.push({ sensor, ...c }));
+  });
+
+  const headerRow = [
+    'export_date', 'station_date', 'site', 'location', 'lf_serial', 'hb_serial',
+    ...allCheckIds.map(c => `${c.sensor.toLowerCase()}_${c.id}`),
+    ...allCheckIds.map(c => `${c.sensor.toLowerCase()}_${c.id}_remark`)
+  ];
+
+  const rows = currentVisit.stations.map((st, i) => {
+    const s = STATIONS[i];
+    return [
+      exportDate,
+      st.stationDate || '',
+      s.site,
+      s.loc,
+      s.lf,
+      s.hb,
+      ...allCheckIds.map(c => st.checks[c.id] || ''),
+      ...allCheckIds.map(c => st.checks[c.id + '_remark'] || '')
+    ];
+  });
+
+  const csv = [headerRow, ...rows]
+    .map(r => r.map(x => `"${String(x).replace(/"/g,'""')}"`).join(','))
+    .join('\n');
+
+  // Save to history
+  visits.unshift({ ...currentVisit, exportDate });
+
+  // Reset current visit
+  currentVisit = {
+    exportDate: null,
+    stations: STATIONS.map(s => ({
+      site: s.site, loc: s.loc,
+      lf_serial: s.lf, hb_serial: s.hb,
+      stationDate: null, checks: {}
+    }))
+  };
+  currentStationIdx = 0;
+  saveState();
+
+  // Download
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.download = `BOS_visit_${exportDate.replace(/\//g,'-')}.csv`;
+  a.click();
+
+  renderStationDots();
+  renderStation(0);
+}
+
+// ── TAB SWITCHING ─────────────────────────────────────────────────────────────
+
+function switchTab(t) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i===0 && t==='visit') || (i===1 && t==='history'));
+  });
+  document.getElementById('view-visit').classList.toggle('active', t==='visit');
+  document.getElementById('view-history').classList.toggle('active', t==='history');
+  if (t === 'history') renderHistory();
+}
+
+function startNewVisit() {
+  if (!confirm('Start a new visit? Current in-progress data will be lost.')) return;
+  currentVisit = {
+    exportDate: null,
+    stations: STATIONS.map(s => ({
+      site: s.site, loc: s.loc,
+      lf_serial: s.lf, hb_serial: s.hb,
+      stationDate: null, checks: {}
+    }))
+  };
+  currentStationIdx = 0;
+  saveState();
+  switchTab('visit');
+  renderStationDots();
+  renderStation(0);
+}
+
+// ── HISTORY ───────────────────────────────────────────────────────────────────
+
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  if (!visits.length) {
+    list.innerHTML = '<div class="empty-state">No completed visits yet.<br>Complete and export a visit<br>to see it here.</div>';
+    return;
+  }
+  list.innerHTML = visits.map((v, vi) => {
+    const visited = v.stations.filter(s => s.stationDate).length;
+    const allBlanks = v.stations.reduce((acc, st) => {
+      SENSOR_ORDER.forEach(sensor => {
+        SENSOR_CHECKS[sensor].forEach(c => {
+          if (!st.checks[c.id]) acc++;
+        });
+      });
+      return acc;
+    }, 0);
+    return `<div class="visit-card" onclick="showVisit(${vi})">
+      <div class="visit-card-head">
+        <span class="visit-date">${v.exportDate}</span>
+        <div class="visit-flags">
+          <span class="flag-chip ok">${visited}/8 stations</span>
+          ${allBlanks ? `<span class="flag-chip blank">${allBlanks} blank</span>` : ''}
+        </div>
+      </div>
+      <div class="visit-stations">
+        ${v.stations.map(st => {
+          const hasBlanks = SENSOR_ORDER.some(sensor =>
+            SENSOR_CHECKS[sensor].some(c => !st.checks[c.id])
+          );
+          const cls = !st.stationDate ? '' : hasBlanks ? 'flagged' : 'done';
+          return `<span class="visit-station-chip ${cls}">${st.site.slice(-3)}/${st.loc}</span>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function showVisit(vi) {
+  const v = visits[vi];
+  let body = v.stations.map((st, i) => {
+    const s = STATIONS[i];
+    const rows = SENSOR_ORDER.map(sensor => {
+      return SENSOR_CHECKS[sensor].map(c => {
+        const val = st.checks[c.id] || '';
+        const rem = st.checks[c.id + '_remark'] || '';
+        return `<div class="modal-check-row">
+          <span class="modal-check-label">${sensor}: ${c.label}</span>
+          <span class="modal-check-val ${val}">${val || '—'}${rem ? ` · ${rem}` : ''}</span>
+        </div>`;
+      }).join('');
+    }).join('');
+
+    return `<div class="modal-station-block">
+      <div class="modal-station-title">${s.site} / ${s.loc} ${st.stationDate ? '· ' + st.stationDate : '(not visited)'}</div>
+      ${rows}
+    </div>`;
+  }).join('');
+
+  document.getElementById('modal-box').innerHTML = `
+    <div class="modal-head">
+      <h3>Visit — ${v.exportDate}</h3>
+      <button class="modal-close" onclick="closeModalDirect()">×</button>
+    </div>
+    <div class="modal-body">
+      ${body}
+      <button class="delete-btn" onclick="deleteVisit(${vi})">Delete this record</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModalDirect();
+}
+
+function closeModalDirect() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function deleteVisit(vi) {
+  if (!confirm('Delete this visit record permanently?')) return;
+  visits.splice(vi, 1);
+  saveState();
+  closeModalDirect();
+  renderHistory();
+}
+
+// ── START ─────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
