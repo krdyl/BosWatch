@@ -4,35 +4,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>BOS Field Tracker</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0f0f0d;
-  --surface: #1a1a17;
-  --surface2: #242420;
-  --border: #2e2e28;
-  --border2: #3a3a34;
-  --text: #e8e6df;
-  --muted: #6b6960;
-  --muted2: #4a4940;
-  --green: #4a9e4a;
-  --green-dim: #1e3d1e;
-  --green-text: #7acc7a;
-  --red: #9e4a4a;
-  --red-dim: #3d1e1e;
-  --red-text: #cc7a7a;
-  --amber: #9e7a2a;
-  --amber-dim: #3d2e0e;
-  --amber-text: #ccaa5a;
-  --blue: #2a6a9e;
-  --blue-dim: #0e2a3d;
-  --blue-text: #5aaacc;
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'IBM Plex Sans', sans-serif;
-  --r: 4px;
+  --bg: #f4f3ef;
+  --surface: #ffffff;
+  --surface2: #eeede8;
+  --border: #dddbd3;
+  --border2: #c8c5bc;
+  --text: #2a2a26;
+  --muted: #7a7870;
+  --muted2: #a8a89e;
+  --green: #3a7a3a;
+  --green-dim: #e8f3e8;
+  --green-text: #2d6b2d;
+  --red: #a03030;
+  --red-dim: #fce8e8;
+  --red-text: #8b2020;
+  --amber: #8a6010;
+  --amber-dim: #fef5e0;
+  --amber-text: #7a5000;
+  --blue: #2a5a8a;
+  --blue-dim: #e8f0f8;
+  --blue-text: #1a4a7a;
+  --mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --r: 6px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; line-height: 1.5; overscroll-behavior: none; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.5; overscroll-behavior: none; }
 
 /* HEADER */
 .app-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
@@ -77,8 +76,8 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); min-
 .progress-label { font-family: var(--mono); font-size: 10px; color: var(--muted); }
 .progress-track { flex: 1; height: 3px; background: var(--border2); border-radius: 2px; overflow: hidden; }
 .progress-fill { height: 100%; background: var(--green-text); border-radius: 2px; transition: width 0.4s ease; }
-.station-dots { display: flex; gap: 4px; flex-wrap: wrap; }
-.station-dot { width: 36px; height: 36px; border-radius: var(--r); border: 1px solid var(--border2); background: var(--surface2); font-family: var(--mono); font-size: 8px; color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; flex-direction: column; line-height: 1.2; text-align: center; padding: 2px; }
+.station-dots { display: flex; gap: 6px; flex-wrap: wrap; }
+.station-dot { width: 52px; height: 52px; border-radius: var(--r); border: 1px solid var(--border2); background: var(--surface2); font-family: var(--mono); font-size: 11px; color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; flex-direction: column; line-height: 1.3; text-align: center; padding: 4px; font-weight: 600; }
 .station-dot.current { border-color: var(--green-text); color: var(--green-text); background: var(--green-dim); }
 .station-dot.done { border-color: var(--green); background: var(--green-dim); color: var(--green-text); }
 .station-dot.flagged { border-color: var(--amber); background: var(--amber-dim); color: var(--amber-text); }
@@ -100,39 +99,39 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); min-
 .sensor-tag.hb { background: var(--green-dim); color: var(--green-text); border: 1px solid var(--green); }
 .sensor-tag.sp { background: var(--surface2); color: var(--muted); border: 1px solid var(--border2); }
 .sensor-info { display: flex; flex-direction: column; }
-.sensor-fullname { font-size: 12px; color: var(--text); }
-.sensor-serial-inline { font-family: var(--mono); font-size: 10px; color: var(--amber-text); margin-top: 1px; }
+.sensor-fullname { font-size: 14px; color: var(--text); }
+.sensor-serial-inline { font-family: var(--mono); font-size: 12px; color: var(--amber-text); margin-top: 1px; }
 .sensor-right { display: flex; align-items: center; gap: 8px; }
-.sensor-progress { font-family: var(--mono); font-size: 10px; color: var(--muted); }
-.mark-all-btn { font-family: var(--mono); font-size: 9px; letter-spacing: 0.06em; padding: 4px 8px; background: var(--green-dim); border: 1px solid var(--green); color: var(--green-text); border-radius: 3px; cursor: pointer; white-space: nowrap; }
+.sensor-progress { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.mark-all-btn { font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; padding: 6px 10px; background: var(--green-dim); border: 1px solid var(--green); color: var(--green-text); border-radius: 3px; cursor: pointer; white-space: nowrap; }
 
 /* CHECK ITEMS */
-.check-item { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.check-item { padding: 12px 14px; border-bottom: 1px solid var(--border); }
 .check-item:last-child { border-bottom: none; }
 .check-top { display: flex; align-items: center; gap: 8px; }
-.check-name { flex: 1; font-size: 13px; color: var(--text); min-width: 100px; }
+.check-name { flex: 1; font-size: 15px; color: var(--text); min-width: 100px; }
 .check-name.done { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--muted2); }
 .check-name.flagged { color: var(--amber-text); }
-.check-controls { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
-.chk-btn { height: 34px; min-width: 34px; padding: 0 8px; border-radius: var(--r); border: 1px solid var(--border2); background: var(--surface2); color: var(--muted); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.12s; font-family: var(--mono); }
+.check-controls { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+.chk-btn { height: 40px; min-width: 40px; padding: 0 10px; border-radius: var(--r); border: 1px solid var(--border2); background: var(--surface2); color: var(--muted); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.12s; font-family: var(--mono); }
 .chk-btn.yes { background: var(--green-dim); border-color: var(--green); color: var(--green-text); }
 .chk-btn.no { background: var(--red-dim); border-color: var(--red); color: var(--red-text); }
-.chk-btn.na { background: var(--amber-dim); border-color: var(--amber); color: var(--amber-text); font-size: 10px; }
+.chk-btn.na { background: var(--amber-dim); border-color: var(--amber); color: var(--amber-text); font-size: 12px; }
 .moisture-wrap { display: flex; align-items: center; gap: 6px; }
-.moisture-input { width: 64px; height: 34px; padding: 0 8px; font-family: var(--mono); font-size: 13px; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--r); color: var(--text); text-align: center; }
+.moisture-input { width: 72px; height: 40px; padding: 0 8px; font-family: var(--mono); font-size: 15px; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--r); color: var(--text); text-align: center; }
 .moisture-input:focus { outline: 1px solid var(--green); }
 .moisture-input.high { border-color: var(--red); color: var(--red-text); }
-.moisture-unit { font-family: var(--mono); font-size: 11px; color: var(--muted); }
-.high-warn { font-size: 11px; color: var(--red-text); }
-.remark-row { margin-top: 6px; }
-.remark-input { width: 100%; padding: 6px 10px; font-family: var(--mono); font-size: 12px; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--r); color: var(--text); }
+.moisture-unit { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.high-warn { font-size: 13px; color: var(--red-text); }
+.remark-row { margin-top: 8px; }
+.remark-input { width: 100%; padding: 8px 10px; font-family: var(--mono); font-size: 14px; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--r); color: var(--text); }
 .remark-input:focus { outline: 1px solid var(--muted); }
-.add-remark-btn { font-family: var(--mono); font-size: 10px; color: var(--muted); background: none; border: none; cursor: pointer; padding: 2px 0; }
+.add-remark-btn { font-family: var(--mono); font-size: 12px; color: var(--muted); background: none; border: none; cursor: pointer; padding: 2px 0; }
 
 /* STATION ACTIONS */
 .station-actions { padding: 14px 16px 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.next-btn { padding: 14px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: var(--green-dim); color: var(--green-text); border: 1px solid var(--green); border-radius: var(--r); cursor: pointer; }
-.export-now-btn { padding: 14px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: var(--blue-dim); color: var(--blue-text); border: 1px solid var(--blue); border-radius: var(--r); cursor: pointer; }
+.next-btn { padding: 16px; font-family: var(--mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; background: var(--green-dim); color: var(--green-text); border: 1px solid var(--green); border-radius: var(--r); cursor: pointer; }
+.export-now-btn { padding: 16px; font-family: var(--mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; background: var(--blue-dim); color: var(--blue-text); border: 1px solid var(--blue); border-radius: var(--r); cursor: pointer; }
 
 /* ACK OVERLAY */
 .ack-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 200; overflow-y: auto; padding: 16px; }
@@ -207,7 +206,7 @@ select { width: 100%; padding: 8px 10px; font-family: var(--sans); font-size: 13
 <body>
 
 <header class="app-header">
-  <div class="app-title">BOS <span>Field</span> Tracker</div>
+  <div class="app-title">BosWatch <span>Field</span> Tracker</div>
   <div class="header-right">
     <span class="operator-badge" id="operator-badge" onclick="editOperator()" style="display:none"></span>
     <span class="header-date" id="header-date"></span>
@@ -222,7 +221,7 @@ select { width: 100%; padding: 8px 10px; font-family: var(--sans); font-size: 13
 <!-- START SCREEN -->
 <div id="view-start" class="view active">
   <div class="start-screen">
-    <div class="start-logo">BOS</div>
+    <div class="start-logo">BosWatch</div>
     <div class="start-sub">Bosland Field Tracker · v2.0</div>
 
     <div id="incognito-warning" class="incognito-warning" style="display:none">
